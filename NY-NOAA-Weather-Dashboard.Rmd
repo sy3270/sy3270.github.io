@@ -1,0 +1,80 @@
+---
+title: "NY NOAA Weather Dashboard"
+output: html_document
+date: "2024-10-27"
+---
+
+```{r setup, include=FALSE}
+
+library(flexdashboard)
+library(plotly)
+library(dplyr)
+library(readr)
+library(lubridate)
+
+# Load the NY NOAA dataset (replace with appropriate file path if necessary)
+ny_noaa <- read_csv("./nynoaadat.csv")
+
+```
+
+# Scatter Plot of Temperature (tmax) Over Time
+
+```{r temp over time}
+
+filtered_data <- filter(ny_noaa, !is.na(tmax))
+sampled_data <- sample_n(filtered_data, 1000) 
+temperature_scatter <- layout(
+  plot_ly(data = sampled_data, x = ~date, y = ~tmax, mode = 'markers', type = 'scatter'),
+  title = "Scatter Plot of Maximum Temperature Over Time",
+  xaxis = list(title = "Date"),
+  yaxis = list(title = "Max Temperature (tmax)")
+)
+
+temperature_scatter
+
+
+
+```
+
+
+# Line plot of average max temperature by month
+
+```{r max temp}
+
+filtered_data <- filter(ny_noaa, !is.na(tmax))
+mutated_data <- mutate(filtered_data, month = month(date, label = TRUE))
+grouped_data <- group_by(mutated_data, month)
+monthly_avg_temp <- summarize(grouped_data, avg_tmax = mean(tmax, na.rm = TRUE))
+temperature_line <- layout(
+  plot_ly(data = monthly_avg_temp, x = ~month, y = ~avg_tmax, type = 'scatter', mode = 'lines+markers'),
+  title = "Average Max Temperature by Month",
+  xaxis = list(title = "Month"),
+  yaxis = list(title = "Average Max Temperature (tmax)")
+)
+
+temperature_line
+
+```
+
+
+# Box plot of temperature (tmax) distribution by month
+
+```{r temp}
+
+
+
+filtered_data <- filter(ny_noaa, !is.na(tmax))
+mutated_data <- mutate(filtered_data, month = month(date, label = TRUE))
+temperature_box <- layout(
+  plot_ly(data = mutated_data, x = ~month, y = ~tmax, type = 'box'),
+  title = "Distribution of Max Temperature by Month",
+  xaxis = list(title = "Month"),
+  yaxis = list(title = "Max Temperature (tmax)")
+)
+
+temperature_box
+
+
+```
+
+
